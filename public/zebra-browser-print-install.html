@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalar Zebra Browser Print</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #718096;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .warning-box {
+            background: #fed7d7;
+            border-left: 4px solid #f56565;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .warning-box h2 {
+            color: #c53030;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .warning-box p {
+            color: #742a2a;
+            line-height: 1.6;
+        }
+
+        .step {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-content {
+            color: #4a5568;
+            line-height: 1.8;
+            margin-left: 55px;
+        }
+
+        .download-button {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .download-button:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .success-box {
+            background: #c6f6d5;
+            border-left: 4px solid #48bb78;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .success-box h3 {
+            color: #22543d;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .success-box p {
+            color: #276749;
+            line-height: 1.6;
+        }
+
+        .verify-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .verify-link:hover {
+            background: #5a67d8;
+        }
+
+        code {
+            background: #edf2f7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #d6336c;
+        }
+
+        ul {
+            margin-left: 55px;
+            margin-top: 10px;
+        }
+
+        li {
+            color: #4a5568;
+            line-height: 1.8;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖨️ Instalar Zebra Browser Print</h1>
+        <p class="subtitle">Software necesario para imprimir etiquetas en impresoras Zebra</p>
+
+        <div class="warning-box">
+            <h2>⚠️ ¡IMPORTANTE!</h2>
+            <p>
+                <strong>Zebra Browser Print es OBLIGATORIO</strong> para que el sistema de impresión funcione.
+                Sin este software instalado, no podrá imprimir etiquetas desde el navegador.
+            </p>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">1</span>
+                Descargar Zebra Browser Print
+            </div>
+            <div class="step-content">
+                <p>Haga clic en el botón de abajo para ir a la página oficial de Zebra y descargar el instalador:</p>
+                <a href="https://www.zebra.com/us/en/support-downloads/software/printer-software/zebra-browser-print.html"
+                   target="_blank"
+                   class="download-button">
+                    📥 Ir a Página de Descarga
+                </a>
+                <p style="margin-top: 15px;">
+                    <strong>Seleccione el instalador según su sistema operativo:</strong>
+                </p>
+                <ul>
+                    <li><strong>Windows:</strong> BrowserPrint-Windows-x64.exe</li>
+                    <li><strong>Mac:</strong> BrowserPrint-Mac.dmg</li>
+                    <li><strong>Linux:</strong> BrowserPrint-Linux.sh</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">2</span>
+                Instalar el Software
+            </div>
+            <div class="step-content">
+                <ul>
+                    <li>Ejecute el instalador descargado</li>
+                    <li>Siga las instrucciones del asistente de instalación</li>
+                    <li>Acepte los términos y condiciones</li>
+                    <li>Mantenga las opciones predeterminadas de instalación</li>
+                    <li>Espere a que termine la instalación</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">3</span>
+                Reiniciar el Navegador
+            </div>
+            <div class="step-content">
+                <p>
+                    <strong>¡MUY IMPORTANTE!</strong> Después de instalar Zebra Browser Print,
+                    debe cerrar <strong>completamente</strong> el navegador y abrirlo de nuevo.
+                </p>
+                <ul>
+                    <li>Cierre todas las ventanas del navegador</li>
+                    <li>Espere unos segundos</li>
+                    <li>Abra el navegador nuevamente</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">4</span>
+                Verificar la Instalación
+            </div>
+            <div class="step-content">
+                <p>Para verificar que Zebra Browser Print está instalado correctamente:</p>
+                <a href="http://localhost:9100" target="_blank" class="verify-link">
+                    ✓ Verificar Instalación (localhost:9100)
+                </a>
+                <p style="margin-top: 15px;">
+                    Al hacer clic, debería abrirse una página que muestra:
+                </p>
+                <ul>
+                    <li>La interfaz de administración de Zebra Browser Print</li>
+                    <li>La versión del software instalado</li>
+                    <li>La lista de impresoras Zebra detectadas</li>
+                </ul>
+                <p style="margin-top: 15px;">
+                    <strong>Si ve un error de conexión:</strong> El software no está instalado o
+                    no se está ejecutando correctamente.
+                </p>
+            </div>
+        </div>
+
+        <div class="success-box">
+            <h3>✅ ¡Instalación Completada!</h3>
+            <p>
+                Una vez que haya completado todos los pasos anteriores y verificado que
+                <code>http://localhost:9100</code> funciona, puede volver a la aplicación
+                de impresión de etiquetas.
+            </p>
+            <p style="margin-top: 10px;">
+                El sistema detectará automáticamente su impresora Zebra y estará listo para imprimir.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

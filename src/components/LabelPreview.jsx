@@ -18,19 +18,22 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
     const generateBarcodes = async () => {
       const urls = {};
 
+      // 5cm ≈ 189px (1cm ≈ 37.8px)
+      const targetWidthPx = 189;
+      const targetHeightPx = 100;
+
       for (const rec of recordsToShow) {
         try {
           const canvas = document.createElement('canvas');
+          // Ajustar el tamaño del canvas antes de dibujar
+          canvas.width = targetWidthPx;
+          canvas.height = targetHeightPx;
           bwipjs.toCanvas(canvas, {
             bcid: 'pdf417',
             text: rec.code_bar,
-            scale: 2.5,
-            height:8,          // Reducir altura para dar más espacio al ancho
-            width: 8,           // Aumentar ancho de módulo
-            columns: 6,        // Más columnas para expandir el ancho
-            rows: 18,            // Menos filas para más ancho
+            scale: 2.2,
             includetext: false,
-            padding: 1,
+            padding: 0,
           });
           urls[rec.code_bar] = canvas.toDataURL('image/png');
         } catch (e) {
@@ -261,11 +264,14 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
               width: 5cm;
               height: 2.5cm;
               page-break-after: always;
-              padding: 0.1cm;
+              padding: 0;
               box-sizing: border-box;
               font-family: Arial, sans-serif;
               background: white;
               position: relative;
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-start;
             }
 
             .label-preview-item:last-child {
@@ -273,7 +279,7 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
             }
 
             .label-header {
-              margin-bottom: 0.05cm;
+              margin-bottom: 0.01cm;
             }
 
             .label-name {
@@ -287,8 +293,8 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
             .label-details {
               font-size: 7pt;
               display: flex;
-              gap: 0.2cm;
-              margin-bottom: 0.1cm;
+              gap: 0.1cm;
+              margin-bottom: 0.05cm;
               line-height: 1.1;
               justify-content: center;
               font-weight: bold;
@@ -296,15 +302,20 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
 
             .label-barcode {
               text-align: center;
-              margin-top: 0.1cm;
+              margin-top: 0;
+              flex: 1 1 auto;
+              display: flex;
+              align-items: flex-end;
+              justify-content: center;
             }
 
             .barcode-image {
-              max-width: 4.8cm;
-              height: auto;
-              max-height: 1.5cm;
+              width: 5cm;
+              height: 2.1cm;
+              object-fit: contain;
               display: block;
-              margin: 0 auto;
+              margin: 0;
+              padding: 0;
             }
 
             .barcode-placeholder {

@@ -5,8 +5,19 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+
 const app = express();
 const PORT = 5000;
+
+// Servir archivos estáticos del frontend (Vite build)
+const distPath = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  // Redirigir todas las rutas no API al index.html del frontend
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 // Middleware
 app.use(cors());

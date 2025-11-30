@@ -24,11 +24,11 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
           bwipjs.toCanvas(canvas, {
             bcid: 'pdf417',
             text: rec.code_bar,
-            scale: 2,
-            height:12,          // Reducir altura para dar más espacio al ancho
-            width: 10,           // Aumentar ancho de módulo
-            columns: 12,        // Más columnas para expandir el ancho
-            rows: 4,            // Menos filas para más ancho
+            scale: 2.5,
+            height:8,          // Reducir altura para dar más espacio al ancho
+            width: 8,           // Aumentar ancho de módulo
+            columns: 6,        // Más columnas para expandir el ancho
+            rows: 18,            // Menos filas para más ancho
             includetext: false,
             padding: 1,
           });

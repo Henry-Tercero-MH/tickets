@@ -1,7 +1,8 @@
 @echo off
-REM Script para imprimir ZPL en impresora Zebra
+REM Script robusto para imprimir ZPL en impresora Zebra
 REM Uso: print.bat "archivo.zpl" "NombreImpresora"
 
+setlocal ENABLEEXTENSIONS
 set ARCHIVO=%~1
 set IMPRESORA=%~2
 
@@ -25,7 +26,7 @@ echo [PRINT.BAT] Intentando metodo 1: PRINT comando
 print /D:"%IMPRESORA%" "%ARCHIVO%" 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo [PRINT.BAT] Metodo 1 exitoso
-    exit /b 0
+    goto :CLEANUP
 )
 echo [PRINT.BAT] Metodo 1 fallo
 
@@ -34,7 +35,7 @@ echo [PRINT.BAT] Intentando metodo 2: COPY a impresora
 copy /B "%ARCHIVO%" "%IMPRESORA%" 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo [PRINT.BAT] Metodo 2 exitoso
-    exit /b 0
+    goto :CLEANUP
 )
 echo [PRINT.BAT] Metodo 2 fallo
 
@@ -43,7 +44,7 @@ echo [PRINT.BAT] Intentando metodo 3: COPY a \\%COMPUTERNAME%\%IMPRESORA%
 copy /B "%ARCHIVO%" "\\%COMPUTERNAME%\%IMPRESORA%" 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo [PRINT.BAT] Metodo 3 exitoso
-    exit /b 0
+    goto :CLEANUP
 )
 echo [PRINT.BAT] Metodo 3 fallo
 
@@ -52,7 +53,7 @@ echo [PRINT.BAT] Intentando metodo 4: COPY a LPT1
 copy /B "%ARCHIVO%" LPT1 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo [PRINT.BAT] Metodo 4 exitoso
-    exit /b 0
+    goto :CLEANUP
 )
 echo [PRINT.BAT] Metodo 4 fallo
 
@@ -61,9 +62,33 @@ echo [PRINT.BAT] Intentando metodo 5: COPY a USB001
 copy /B "%ARCHIVO%" USB001 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo [PRINT.BAT] Metodo 5 exitoso
-    exit /b 0
+    goto :CLEANUP
 )
 echo [PRINT.BAT] Metodo 5 fallo
 
+REM Intentar método 6: Puerto USB002
+echo [PRINT.BAT] Intentando metodo 6: COPY a USB002
+copy /B "%ARCHIVO%" USB002 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo [PRINT.BAT] Metodo 6 exitoso
+    goto :CLEANUP
+)
+echo [PRINT.BAT] Metodo 6 fallo
+
+REM Intentar método 7: Puerto FILE
+echo [PRINT.BAT] Intentando metodo 7: COPY a FILE
+copy /B "%ARCHIVO%" FILE 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo [PRINT.BAT] Metodo 7 exitoso
+    goto :CLEANUP
+)
+echo [PRINT.BAT] Metodo 7 fallo
+
 echo [PRINT.BAT ERROR] Todos los metodos fallaron
 exit /b 1
+
+:CLEANUP
+REM Eliminar archivo temporal si es necesario (descomentar si se usa archivo temporal)
+REM del "%ARCHIVO%" >nul 2>&1
+echo [PRINT.BAT] Impresion finalizada
+exit /b 0

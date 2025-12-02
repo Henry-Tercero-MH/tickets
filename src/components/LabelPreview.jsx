@@ -1,21 +1,35 @@
 import { useRef, useEffect, useState } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import bwipjs from 'bwip-js';
+import LabelPrintContent from './LabelPrintContent';
+import './LabelPrint.css';
 
 /**
  * Componente de vista previa de etiquetas
  * Muestra cómo se verán las etiquetas impresas (5cm x 2.5cm)
- * Soporta múltiples registros
+ * Soporta múltiples registros y etiquetas manuales de texto simple
  */
-const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
+const LabelPreview = ({ record, records, quantity = 1, onClose, manualText }) => {
   const printRef = useRef();
   const [barcodeUrls, setBarcodeUrls] = useState({});
 
-  // Determinar qué registros mostrar (si se pasa 'records' usar eso, sino usar 'record')
-  const recordsToShow = records || (record ? [record] : []);
+  // Si es una etiqueta manual, crear un registro especial
+  const isManualLabel = !!manualText;
 
-  // Generar códigos de barras PDF417 para todos los registros
+  // Determinar qué registros mostrar
+  const recordsToShow = isManualLabel
+    ? [{ isManual: true, manualText: manualText }]
+    : (records || (record ? [record] : []));
+
+  // Generar códigos de barras PDF417 para todos los registros (excepto etiquetas manuales)
   useEffect(() => {
     const generateBarcodes = async () => {
+      // No generar códigos de barras para etiquetas manuales
+      if (isManualLabel) {
+        setBarcodeUrls({});
+        return;
+      }
+
       const urls = {};
 
       // 5cm ≈ 189px (1cm ≈ 37.8px)
@@ -47,41 +61,33 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
     if (recordsToShow.length > 0) {
       generateBarcodes();
     }
-  }, [recordsToShow]);
+  }, [recordsToShow, isManualLabel]);
 
-  // Manejar impresión usando window.print()
-  const handlePrint = () => {
-    window.print();
-  };
+  // Manejar impresión usando react-to-print
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    pageStyle: `
+      @page {
+        size: 5cm 2.5cm;
+        margin: 0;
+      }
+      @media print {
+        body {
+          margin: 0;
+          padding: 0;
+        }
+      }
+    `,
+  });
 
-  // Renderizar etiquetas para todos los registros
-  const renderAllLabels = () => {
+  // Preparar datos para imprimir (sin JSX, solo datos)
+  const preparePrintLabels = () => {
     const allLabels = [];
 
     recordsToShow.forEach((rec, recordIndex) => {
       // Para cada registro, generar 'quantity' copias
       for (let i = 0; i < quantity; i++) {
-        allLabels.push(
-          <div key={`${rec.id_empleados}-${i}`} className="label-preview-item print-only">
-            <div className="label-header">
-              <h2 className="label-name">{rec.nombre} - {rec.id_empleados}</h2>
-            </div>
-            <div className="label-details">
-              <span className="label-detail">F- {rec.id_frente}</span>
-              <span className="label-detail">{rec.id_contratista}</span>
-              <span className="label-detail">{rec.nombre_contratista}</span>
-            </div>
-            <div className="label-barcode">
-              {barcodeUrls[rec.code_bar] ? (
-                <img src={barcodeUrls[rec.code_bar]} alt="PDF417" className="barcode-image" />
-              ) : (
-                <div className="barcode-placeholder">
-                  {rec.code_bar}
-                </div>
-              )}
-            </div>
-          </div>
-        );
+        allLabels.push(rec);
       }
     });
 
@@ -143,34 +149,86 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
                     flexDirection: 'column'
                   }}
                 >
-                  <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '6px', lineHeight: '1.2', textAlign: 'center' }}>
-                    {rec.nombre} - {rec.id_empleados}
-                  </div>
-                  <div style={{ fontSize: '10px', display: 'flex', gap: '8px', marginBottom: '6px', lineHeight: '1.2', justifyContent: 'center', fontWeight: 'bold' }}>
-                    <span>F-{rec.id_frente}</span>
-                    <span>{rec.id_contratista}</span>
-                    <span>{rec.nombre_contratista}</span>
-                  </div>
-                  <div style={{
-                    textAlign: 'center',
-                    marginTop: 'auto',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}>
-                    {barcodeUrls[rec.code_bar] ? (
-                      <img src={barcodeUrls[rec.code_bar]} alt="PDF417" style={{ maxWidth: '100%', maxHeight: '70px', objectFit: 'contain' }} />
-                    ) : (
-                      <div style={{
-                        fontSize: '6px',
-                        border: '1px solid #999',
-                        padding: '4px',
-                        backgroundColor: '#f0f0f0'
-                      }}>
-                        PDF417: {rec.code_bar}
+                  {rec.isManual ? (
+                    // Vista previa para etiqueta manual con tamaño dinámico
+                    (() => {
+                      const length = rec.manualText.length;
+                      let fontSize = '24px';
+
+                      // Misma lógica que LabelPrintContent para consistencia
+                      if (length <= 4) {
+                        fontSize = '34px';
+                      } else if (length <= 8) {
+                        fontSize = '28px';
+                      } else if (length <= 12) {
+                        fontSize = '22px';
+                      } else if (length <= 18) {
+                        fontSize = '18px';
+                      } else if (length <= 25) {
+                        fontSize = '15px';
+                      } else if (length <= 35) {
+                        fontSize = '12px';
+                      } else if (length <= 50) {
+                        fontSize = '10px';
+                      } else {
+                        fontSize = '8px';
+                      }
+
+                      return (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '100%',
+                          fontSize: fontSize,
+                          fontWeight: 'bold',
+                          textAlign: 'center',
+                          wordWrap: 'break-word',
+                          wordBreak: 'break-word',
+                          padding: '5px',
+                          border: '3px solid #000',
+                          borderRadius: '4px',
+                          backgroundColor: '#fff',
+                          lineHeight: '1.1',
+                          overflow: 'hidden'
+                        }}>
+                          {rec.manualText}
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    // Vista previa normal con código de barras
+                    <>
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '6px', lineHeight: '1.2', textAlign: 'center' }}>
+                        {rec.nombre} - {rec.id_empleados}
                       </div>
-                    )}
-                  </div>
+                      <div style={{ fontSize: '10px', display: 'flex', gap: '8px', marginBottom: '6px', lineHeight: '1.2', justifyContent: 'center', fontWeight: 'bold' }}>
+                        <span>F-{rec.id_frente}</span>
+                        <span>{rec.id_contratista}</span>
+                        <span>{rec.nombre_contratista}</span>
+                      </div>
+                      <div style={{
+                        textAlign: 'center',
+                        marginTop: 'auto',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                      }}>
+                        {barcodeUrls[rec.code_bar] ? (
+                          <img src={barcodeUrls[rec.code_bar]} alt="PDF417" style={{ maxWidth: '100%', maxHeight: '70px', objectFit: 'contain' }} />
+                        ) : (
+                          <div style={{
+                            fontSize: '6px',
+                            border: '1px solid #999',
+                            padding: '4px',
+                            backgroundColor: '#f0f0f0'
+                          }}>
+                            PDF417: {rec.code_bar}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                   {recordsToShow.length > 6 && i === 5 && (
                     <div style={{
                       position: 'absolute',
@@ -186,7 +244,7 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
                       fontSize: '12px',
                       fontWeight: 'bold'
                     }}>
-                      +{recordsToShow.length - 6} empleado(s) más
+                      +{recordsToShow.length - 6} {isManualLabel ? 'etiqueta(s)' : 'empleado(s)'} más
                     </div>
                   )}
                   {quantity > 1 && (
@@ -226,113 +284,13 @@ const LabelPreview = ({ record, records, quantity = 1, onClose }) => {
         </div>
       </div>
 
-      {/* Contenido para imprimir (oculto en pantalla) */}
-      <div ref={printRef} className="print-only">
-        <style>{`
-          @media print {
-            @page {
-              size: 5cm 2.5cm;
-              margin: 0;
-            }
-
-            body {
-              margin: 0;
-              padding: 0;
-            }
-
-            /* Ocultar todo excepto lo que se debe imprimir */
-            body * {
-              visibility: hidden;
-            }
-
-            .print-only,
-            .print-only * {
-              visibility: visible;
-            }
-
-            .print-only {
-              position: absolute;
-              left: 0;
-              top: 0;
-            }
-
-            .no-print {
-              display: none !important;
-            }
-
-            .label-preview-item {
-              width: 5cm;
-              height: 2.5cm;
-              page-break-after: always;
-              padding: 0;
-              box-sizing: border-box;
-              font-family: Arial, sans-serif;
-              background: white;
-              position: relative;
-              display: flex;
-              flex-direction: column;
-              justify-content: flex-start;
-            }
-
-            .label-preview-item:last-child {
-              page-break-after: auto;
-            }
-
-            .label-header {
-              margin-bottom: 0.01cm;
-            }
-
-            .label-name {
-              font-size: 8pt;
-              font-weight: bold;
-              margin: 0;
-              line-height: 1.1;
-              text-align: center;
-            }
-
-            .label-details {
-              font-size: 7pt;
-              display: flex;
-              gap: 0.1cm;
-              margin-bottom: 0.05cm;
-              line-height: 1.1;
-              justify-content: center;
-              font-weight: bold;
-            }
-
-            .label-barcode {
-              text-align: center;
-              margin-top: 0;
-              flex: 1 1 auto;
-              display: flex;
-              align-items: flex-end;
-              justify-content: center;
-            }
-
-            .barcode-image {
-              width: 5cm;
-              height: 2.1cm;
-              object-fit: contain;
-              display: block;
-              margin: 0;
-              padding: 0;
-            }
-
-            .barcode-placeholder {
-              border: 1px solid #000;
-              padding: 0.1cm;
-              font-size: 6pt;
-              background: #f5f5f5;
-            }
-          }
-
-          @media screen {
-            .print-only {
-              display: none !important;
-            }
-          }
-        `}</style>
-        {renderAllLabels()}
+      {/* Contenido para imprimir (oculto en pantalla) - SIN Tailwind */}
+      <div style={{ display: 'none' }}>
+        <LabelPrintContent
+          ref={printRef}
+          labels={preparePrintLabels()}
+          barcodeUrls={barcodeUrls}
+        />
       </div>
     </>
   );

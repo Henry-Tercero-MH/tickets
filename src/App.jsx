@@ -8,6 +8,8 @@ import backendPrintService from './services/backendPrintService';
 import { generateMultipleZPL, validateRecord, ZPLCommands } from './utils/zplGenerator';
 
 function App() {
+  // Para navegación simple entre páginas
+  const [page, setPage] = useState('main');
   const [empleados, setEmpleados] = useState([]);
   const [empleadosOriginales, setEmpleadosOriginales] = useState([]);
   const [selectedRecords, setSelectedRecords] = useState([]);
@@ -199,6 +201,15 @@ function App() {
     setShowPreview(true);
   };
 
+  // Manejar vista previa de etiquetas manuales
+  const handleManualPreview = (text) => {
+    setPreviewData({
+      manualText: text,
+      quantity: 1
+    });
+    setShowPreview(true);
+  };
+
   // Componente de notificación
   const Notification = ({ notification }) => {
     const colors = {
@@ -217,52 +228,59 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100">
+    
+
       {/* Vista Previa Modal */}
       {showPreview && previewData && (
         <LabelPreview
           records={previewData.records}
+          manualText={previewData.manualText}
           quantity={previewData.quantity}
           onClose={() => setShowPreview(false)}
         />
       )}
 
+
       {/* Header */}
-      <header className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Sistema de Impresión de Etiquetas
-              </h1>
-              <p className="mt-1 text-sm text-gray-600">
-                Impresora Zebra GK420t - Etiquetas 5cm x 2.5cm
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              {/* Estado de la impresora */}
-              <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${printerConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-                <span className="text-sm text-gray-600">
-                  {printerConnected ? 'Impresora Conectada' : 'Sin Impresora'}
-                </span>
+      {page === 'main' && (
+        <header className="bg-gradient-to-r from-blue-900 to-blue-800 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-white">
+                  EPSA-TICKETS
+                </h1>
+                <p className="mt-1 text-sm text-blue-100">
+                  Impresora Zebra GK420t - Etiquetas 5cm x 2.5cm
+                </p>
               </div>
-              <button
-                onClick={checkPrinterConnection}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                Reconectar
-              </button>
-              <button
-                onClick={handleTestPrint}
-                disabled={!printerConnected}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                Prueba
-              </button>
+              <div className="flex items-center gap-4">
+                {/* Estado de la impresora */}
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${printerConnected ? 'bg-green-400' : 'bg-red-400'}`} />
+                  <span className="text-sm text-white">
+                    {printerConnected ? 'Impresora Conectada' : 'Sin Impresora'}
+                  </span>
+                </div>
+                <button
+                  onClick={checkPrinterConnection}
+                  className="px-4 py-2 bg-white text-blue-900 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium shadow-md"
+                >
+                  Reconectar
+                </button>
+                <button
+                  onClick={handleTestPrint}
+                  disabled={!printerConnected}
+                  className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium disabled:bg-blue-400 disabled:cursor-not-allowed shadow-md"
+                >
+                  Prueba
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
+
 
       {/* Notificaciones */}
       <div className="fixed top-4 right-4 z-50 max-w-md">
@@ -270,6 +288,7 @@ function App() {
           <Notification key={notification.id} notification={notification} />
         ))}
       </div>
+
 
       {/* Contenido principal */}
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -298,64 +317,65 @@ function App() {
                 />
               </div>
 
-            {/* Controles de impresión */}
-            <div className="lg:col-span-1">
-              <PrintControls
-                selectedRecords={selectedRecords}
-                onPrint={handlePrint}
-                onPreview={handlePreview}
-                isPrinting={isPrinting}
-              />
+              {/* Controles de impresión */}
+              <div className="lg:col-span-1">
+                <PrintControls
+                  selectedRecords={selectedRecords}
+                  onPrint={handlePrint}
+                  onPreview={handlePreview}
+                  onManualPreview={handleManualPreview}
+                  isPrinting={isPrinting}
+                />
 
-              {/* Información adicional */}
-              <div className="mt-6 bg-white rounded-lg shadow-lg p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-3">
-                  Instrucciones
-                </h3>
-                <ol className="text-sm text-gray-600 space-y-2">
-                  <li className="flex gap-2">
-                    <span className="font-bold text-blue-600">1.</span>
-                    <span>Seleccione uno o más empleados de la tabla</span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-bold text-blue-600">2.</span>
-                    <span>Elija la cantidad de etiquetas por empleado</span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-bold text-blue-600">3.</span>
-                    <span>Presione el botón "Imprimir"</span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-bold text-blue-600">4.</span>
-                    <span>Las etiquetas se imprimirán automáticamente</span>
-                  </li>
-                </ol>
-              </div>
+                {/* Información adicional */}
+                <div className="mt-6 bg-white rounded-lg shadow-lg p-6">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3">
+                    Instrucciones
+                  </h3>
+                  <ol className="text-sm text-gray-600 space-y-2">
+                    <li className="flex gap-2">
+                      <span className="font-bold text-blue-600">1.</span>
+                      <span>Seleccione uno o más empleados de la tabla</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="font-bold text-blue-600">2.</span>
+                      <span>Elija la cantidad de etiquetas por empleado</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="font-bold text-blue-600">3.</span>
+                      <span>Presione el botón "Imprimir"</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="font-bold text-blue-600">4.</span>
+                      <span>Las etiquetas se imprimirán automáticamente</span>
+                    </li>
+                  </ol>
+                </div>
 
-              {/* Información del sistema */}
-              <div className="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h4 className="text-sm font-bold text-gray-700 mb-2">
-                  Información del Sistema
-                </h4>
-                <div className="text-xs text-gray-600 space-y-1">
-                  <div className="flex justify-between">
-                    <span>Total empleados:</span>
-                    <span className="font-medium">{empleados.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Seleccionados:</span>
-                    <span className="font-medium">{selectedRecords.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Servidor backend:</span>
-                    <span className={`font-medium ${printerConnected ? 'text-green-600' : 'text-red-600'}`}>
-                      {printerConnected ? 'Conectado' : 'Desconectado'}
-                    </span>
+                {/* Información del sistema */}
+                <div className="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h4 className="text-sm font-bold text-gray-700 mb-2">
+                    Información del Sistema
+                  </h4>
+                  <div className="text-xs text-gray-600 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Total empleados:</span>
+                      <span className="font-medium">{empleados.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Seleccionados:</span>
+                      <span className="font-medium">{selectedRecords.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Servidor backend:</span>
+                      <span className={`font-medium ${printerConnected ? 'text-green-600' : 'text-red-600'}`}> 
+                        {printerConnected ? 'Conectado' : 'Desconectado'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
           </>
         )}
       </main>

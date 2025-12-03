@@ -4,8 +4,7 @@ import PrintControls from './components/PrintControls';
 import LabelPreview from './components/LabelPreview';
 import FilterPanel from './components/FilterPanel';
 import { fetchEmpleados } from './services/apiService';
-import backendPrintService from './services/backendPrintService';
-import { generateMultipleZPL, validateRecord, ZPLCommands } from './utils/zplGenerator';
+import { validateRecord } from './utils/zplGenerator';
 
 function App() {
   // Para navegación simple entre páginas
@@ -64,28 +63,11 @@ function App() {
     setSelectedRecords([]); // Limpiar selección al filtrar
   }, [empleadosOriginales]);
 
-  // Verificar conexión con la impresora
+  // Verificar conexión (simplificada - ya no necesitamos backend)
   const checkPrinterConnection = async () => {
-    try {
-      const isBackendRunning = await backendPrintService.isInstalled();
-
-      if (!isBackendRunning) {
-        showNotification(
-          'El servidor de impresión no está ejecutándose. Inicie el backend con: npm start',
-          'warning'
-        );
-        return;
-      }
-
-      const printers = await backendPrintService.getAvailablePrinters();
-      if (printers.length > 0) {
-        setPrinterConnected(true);
-        showNotification(`Impresora conectada: ${printers[0]}`, 'success');
-      }
-    } catch (error) {
-      setPrinterConnected(false);
-      showNotification('No se detectó ninguna impresora: ' + error.message, 'error');
-    }
+    // Con el diálogo del sistema, siempre está "conectado"
+    setPrinterConnected(true);
+    showNotification('Sistema de impresión listo (diálogo del navegador)', 'success');
   };
 
   // Mostrar notificaciones
@@ -102,17 +84,12 @@ function App() {
 
   // Manejar impresión
   const handlePrint = async (quantity) => {
-    console.log('🖨️ [handlePrint] Iniciando impresión...');
+    console.log('🖨️ [handlePrint] Iniciando impresión con diálogo del sistema...');
     console.log('📊 [handlePrint] Registros seleccionados:', selectedRecords.length);
     console.log('🔢 [handlePrint] Cantidad por registro:', quantity);
 
     if (selectedRecords.length === 0) {
       showNotification('Seleccione al menos un registro para imprimir', 'warning');
-      return;
-    }
-
-    if (!printerConnected) {
-      showNotification('No hay impresora conectada', 'error');
       return;
     }
 
@@ -129,61 +106,32 @@ function App() {
       }
       console.log('✅ [handlePrint] Todos los registros son válidos');
 
-      // Generar códigos ZPL para cada registro
-      console.log('📝 [handlePrint] Generando códigos ZPL...');
-      const zplCodes = selectedRecords.map((record, index) => {
-        const zpl = generateMultipleZPL(record, quantity);
-        console.log(`📄 [handlePrint] ZPL #${index + 1} para ${record.nombre}:`, zpl.substring(0, 100) + '...');
-        return zpl;
+      // Mostrar el diálogo de impresión usando LabelPreview con autoPrint
+      setPreviewData({
+        records: selectedRecords,
+        quantity: quantity,
+        autoPrint: true
       });
-      console.log('✅ [handlePrint] Códigos ZPL generados:', zplCodes.length);
+      setShowPreview(true);
 
-      // Imprimir
-      showNotification(`Imprimiendo ${selectedRecords.length * quantity} etiquetas...`, 'info');
-      console.log('🚀 [handlePrint] Enviando a backendPrintService.printMultiple...');
-      const results = await backendPrintService.printMultiple(zplCodes);
-      console.log('📥 [handlePrint] Resultados recibidos:', results);
+      showNotification(`Abriendo diálogo de impresión para ${selectedRecords.length * quantity} etiquetas...`, 'info');
 
-      // Verificar resultados
-      const successCount = results.filter(r => r.success).length;
-      const failCount = results.length - successCount;
-      console.log(`📊 [handlePrint] Exitosas: ${successCount}, Fallidas: ${failCount}`);
-
-      if (failCount === 0) {
-        showNotification(
-          `¡Impresión exitosa! Se imprimieron ${selectedRecords.length * quantity} etiquetas`,
-          'success'
-        );
-        // Limpiar selección después de imprimir
+      // Limpiar selección después de un breve delay para permitir que se abra el diálogo
+      setTimeout(() => {
         setSelectedRecords([]);
-      } else {
-        showNotification(
-          `Impresión completada con errores: ${successCount} exitosas, ${failCount} fallidas`,
-          'warning'
-        );
-      }
+        setIsPrinting(false);
+      }, 1000);
+
     } catch (error) {
       console.error('❌ [handlePrint] Error:', error);
-      showNotification('Error al imprimir: ' + error.message, 'error');
-    } finally {
+      showNotification('Error al preparar impresión: ' + error.message, 'error');
       setIsPrinting(false);
-      console.log('🏁 [handlePrint] Proceso finalizado');
     }
   };
 
-  // Manejar prueba de impresión
+  // Manejar prueba de impresión (simplificada)
   const handleTestPrint = async () => {
-    if (!printerConnected) {
-      showNotification('No hay impresora conectada', 'error');
-      return;
-    }
-
-    try {
-      await backendPrintService.print(ZPLCommands.testLabel);
-      showNotification('Etiqueta de prueba enviada', 'success');
-    } catch (error) {
-      showNotification('Error en prueba de impresión: ' + error.message, 'error');
-    }
+    showNotification('El sistema usa el diálogo de impresión del navegador. Haz clic en "Imprimir" para abrir el diálogo.', 'info');
   };
 
   // Manejar vista previa
@@ -236,6 +184,7 @@ function App() {
           records={previewData.records}
           manualText={previewData.manualText}
           quantity={previewData.quantity}
+          autoPrint={previewData.autoPrint}
           onClose={() => setShowPreview(false)}
         />
       )}
@@ -251,29 +200,22 @@ function App() {
                   EPSA-TICKETS
                 </h1>
                 <p className="mt-1 text-sm text-blue-100">
-                  Impresora Zebra GK420t - Etiquetas 5cm x 2.5cm
+                  Impresora de Etiquetas - Diálogo del Sistema
                 </p>
               </div>
               <div className="flex items-center gap-4">
-                {/* Estado de la impresora */}
+                {/* Estado del sistema de impresión */}
                 <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${printerConnected ? 'bg-green-400' : 'bg-red-400'}`} />
+                  <div className={`w-3 h-3 rounded-full bg-green-400`} />
                   <span className="text-sm text-white">
-                    {printerConnected ? 'Impresora Conectada' : 'Sin Impresora'}
+                    Diálogo de Impresión Listo
                   </span>
                 </div>
                 <button
                   onClick={checkPrinterConnection}
                   className="px-4 py-2 bg-white text-blue-900 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium shadow-md"
                 >
-                  Reconectar
-                </button>
-                <button
-                  onClick={handleTestPrint}
-                  disabled={!printerConnected}
-                  className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium disabled:bg-blue-400 disabled:cursor-not-allowed shadow-md"
-                >
-                  Prueba
+                  Verificar
                 </button>
               </div>
             </div>
@@ -367,10 +309,8 @@ function App() {
                       <span className="font-medium">{selectedRecords.length}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Servidor backend:</span>
-                      <span className={`font-medium ${printerConnected ? 'text-green-600' : 'text-red-600'}`}> 
-                        {printerConnected ? 'Conectado' : 'Desconectado'}
-                      </span>
+                      <span>Método de impresión:</span>
+                      <span className="font-medium text-green-600">Diálogo del Navegador</span>
                     </div>
                   </div>
                 </div>

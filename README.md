@@ -1,6 +1,6 @@
-# Sistema de Impresión de Etiquetas Zebra
+# Sistema de Impresión de Etiquetas
 
-Sistema completo en React para imprimir etiquetas en impresoras Zebra GK420t usando código ZPL y Zebra Browser Print.
+Sistema completo en React para imprimir etiquetas usando el diálogo de impresión del navegador.
 
 ## Características Principales
 
@@ -8,8 +8,8 @@ Sistema completo en React para imprimir etiquetas en impresoras Zebra GK420t usa
 - ✅ Tabla interactiva con filtros en tiempo real y ordenamiento
 - ✅ Selección múltiple de registros
 - ✅ Conversión automática a MAYÚSCULAS de todos los datos
-- ✅ Generación dinámica de código ZPL con PDF417
-- ✅ Impresión directa en Zebra GK420t mediante Zebra Browser Print
+- ✅ Generación de etiquetas con códigos de barras PDF417 renderizados como imágenes
+- ✅ Impresión directa mediante el diálogo de impresión del navegador
 - ✅ Interfaz moderna con Tailwind CSS
 - ✅ Control de cantidad de etiquetas por registro
 - ✅ Sistema de notificaciones en tiempo real
@@ -34,24 +34,12 @@ Todos los textos se imprimen en **MAYÚSCULAS**.
 - Node.js 16.x o superior
 - npm o yarn
 
-### 2. Zebra Browser Print
-**¡IMPORTANTE!** Debe instalar Zebra Browser Print para que la impresión funcione.
+### 2. Navegador Web
+- Chrome 90+, Firefox 88+, Edge 90+, Safari 14+
+- Cualquier impresora conectada al sistema
 
-#### Instalación en Windows:
-1. Descargue desde: https://www.zebra.com/us/en/support-downloads/software/printer-software/zebra-browser-print.html
-2. Ejecute el instalador `BrowserPrint-Windows-x64.exe`
-3. Siga las instrucciones del instalador
-4. Reinicie el navegador después de la instalación
-
-#### Verificación:
-- Abra el navegador y vaya a: `http://localhost:9100`
-- Debería ver la página de administración de Zebra Browser Print
-- Verifique que su impresora Zebra aparezca en la lista
-
-### 3. Impresora Zebra GK420t
-- Conectada por USB o red
-- Configurada con etiquetas de 5 cm × 2.5 cm
-- Drivers instalados correctamente
+### 3. Librerías
+- Todas las dependencias se instalan automáticamente con npm install
 
 ## Instalación
 
@@ -107,10 +95,9 @@ zafra2025/
 
 ## Uso de la Aplicación
 
-### 1. Verificar Conexión
-- Al abrir la aplicación, verifique que aparezca "Impresora Conectada" en el header
-- Si no aparece, haga clic en "Reconectar"
-- Use el botón "Prueba" para imprimir una etiqueta de prueba
+### 1. Verificar Sistema
+- Al abrir la aplicación, verifique que aparezca "Diálogo de Impresión Listo" en el header
+- El sistema usa el diálogo de impresión nativo del navegador
 
 ### 2. Seleccionar Empleados
 - Use la barra de búsqueda para filtrar empleados
@@ -124,8 +111,9 @@ zafra2025/
 
 ### 4. Imprimir
 - Haga clic en "Imprimir"
-- Espere a que se complete la impresión
-- Verifique las notificaciones para confirmar el éxito
+- Se abrirá el diálogo de impresión del navegador
+- Seleccione su impresora y haga clic en "Imprimir"
+- Las etiquetas se imprimirán automáticamente
 
 ## Configuración de la API
 
@@ -210,37 +198,30 @@ npm run preview      # Previsualiza el build de producción
 
 ## Solución de Problemas
 
-### ❌ "Zebra Browser Print no está instalado"
+### ❌ "No se puede imprimir"
 **Solución:**
-1. Descargue e instale Zebra Browser Print
-2. Reinicie el navegador
-3. Verifique que el servicio esté corriendo en `http://localhost:9100`
+1. Verifique que tenga una impresora conectada al sistema
+2. Asegúrese de que los drivers de la impresora estén instalados
+3. En el diálogo de impresión, seleccione la impresora correcta
+4. Verifique que haya papel en la impresora
 
-### ❌ "No se detectó ninguna impresora Zebra"
+### ❌ Las etiquetas no se imprimen en el tamaño correcto
 **Solución:**
-1. Verifique que la impresora esté encendida y conectada
-2. Revise que los drivers estén instalados
-3. Abra `http://localhost:9100` y verifique que aparezca la impresora
-4. Haga clic en "Reconectar" en la aplicación
+1. En el diálogo de impresión, configure el tamaño de página en "Personalizado" o "Etiquetas"
+2. Ajuste las dimensiones a 5 cm × 2.5 cm (2 × 1 pulgadas)
+3. Configure los márgenes a 0
+4. Use la opción "Ajustar al tamaño de página" si es necesario
 
-### ❌ "Error al imprimir"
+### ❌ Los códigos de barras no se imprimen correctamente
 **Solución:**
-1. Verifique que haya etiquetas en la impresora
-2. Revise que el tamaño de etiqueta sea correcto (5×2.5 cm)
-3. Calibre la impresora si es necesario
-4. Revise que no haya errores en la impresora (papel atascado, tapa abierta, etc.)
+1. Verifique que el navegador soporte la librería bwip-js
+2. Asegúrese de que las imágenes se carguen completamente antes de imprimir
+3. Si los códigos aparecen borrosos, aumente la resolución de impresión
 
 ### ❌ Los datos no se convierten a mayúsculas
 **Solución:**
-- Los datos ya se convierten automáticamente en `apiService.js` y `zplGenerator.js`
+- Los datos ya se convierten automáticamente en `apiService.js`
 - Si aún aparecen en minúsculas, revise que esté usando las funciones `normalizeData` y `normalizeRecord`
-
-### ❌ El código de barras no se imprime correctamente
-**Solución:**
-1. Verifique que `code_bar` contenga solo números
-2. Ajuste el tamaño del código de barras en `zplGenerator.js`:
-   - Línea: `^FO10,120^B7N,3,3,7,1,N`
-   - Parámetros: altura, densidad, orientación
 
 ## Personalización
 
@@ -294,8 +275,9 @@ app.post('/print', (req, res) => {
 - **Vite** - Build tool
 - **Tailwind CSS** - Estilos
 - **Axios** - HTTP Client
-- **Zebra Browser Print** - Comunicación con impresora
-- **ZPL II** - Lenguaje de programación de Zebra
+- **react-to-print** - Diálogo de impresión del navegador
+- **bwip-js** - Generación de códigos de barras PDF417
+- **CSS Print Media** - Estilos de impresión
 
 ## Licencia
 
@@ -312,18 +294,18 @@ Para problemas o preguntas:
 
 ⚠️ **TODOS LOS DATOS SE CONVIERTEN A MAYÚSCULAS AUTOMÁTICAMENTE**
 - En la tabla de visualización
-- En las etiquetas ZPL
+- En las etiquetas impresas
 - No es necesario formatear manualmente
 
-⚠️ **Zebra Browser Print es obligatorio**
-- Sin este software, la impresión NO funcionará
-- Debe estar instalado en la computadora que imprime
-- Funciona en Windows, Mac y Linux
+⚠️ **EL SISTEMA USA EL DIÁLOGO DE IMPRESIÓN DEL NAVEGADOR**
+- Compatible con cualquier impresora conectada al sistema
+- Las etiquetas se renderizan como HTML/CSS para impresión
+- Configure el tamaño de página en el diálogo de impresión (5cm × 2.5cm)
 
-⚠️ **Configuración de Etiquetas**
-- Las etiquetas deben ser de 5 cm × 2.5 cm
-- Configure la impresora correctamente
-- Calibre la impresora antes del primer uso
+⚠️ **CÓDIGOS DE BARRAS PDF417**
+- Se generan como imágenes usando bwip-js
+- Optimizados para etiquetas pequeñas
+- Compatibles con lectores estándar
 
 ---
 

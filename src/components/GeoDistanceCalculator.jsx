@@ -26,12 +26,32 @@ function MapClickHandler({ onMapClick }) {
 }
 
 const GeoDistanceCalculator = () => {
+
   const [lat1, setLat1] = useState('');
   const [lon1, setLon1] = useState('');
   const [lat2, setLat2] = useState('');
   const [lon2, setLon2] = useState('');
   const [distance, setDistance] = useState(null);
   const [points, setPoints] = useState([]); // For map markers
+  const [mapCenter, setMapCenter] = useState(defaultPosition);
+
+  // On mount, try to get user's geolocation
+  React.useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setMapCenter([latitude, longitude]);
+          // Set as first marker if not already set
+          setLat1(latitude.toFixed(6));
+          setLon1(longitude.toFixed(6));
+          setPoints([{ lat: latitude, lng: longitude }]);
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    }
+  }, []);
 
   const handleCalculate = () => {
     if (lat1 && lon1 && lat2 && lon2) {
@@ -99,7 +119,7 @@ const GeoDistanceCalculator = () => {
         </div>
       )}
       <div className="mt-6">
-        <MapContainer center={defaultPosition} zoom={5} style={{ height: '350px', borderRadius: '1rem', boxShadow: '0 4px 24px #0002' }}>
+        <MapContainer center={mapCenter} zoom={5} style={{ height: '350px', borderRadius: '1rem', boxShadow: '0 4px 24px #0002' }}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; OpenStreetMap contributors"

@@ -1,6 +1,41 @@
 import React, { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+// Fix leaflet marker icon for production (so markers show up)
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+// Button to center map on user's location
+function CenterLocationButton({ setMapCenter }) {
+  const map = useMap();
+  const handleClick = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          map.setView([latitude, longitude], 17);
+          setMapCenter([latitude, longitude]);
+        }
+      );
+    }
+  };
+  return (
+    <button
+      className="absolute top-4 right-4 z-[1000] bg-blue-600 text-white px-3 py-2 rounded shadow hover:bg-blue-700"
+      style={{ position: 'absolute' }}
+      onClick={handleClick}
+      title="Centrar en mi ubicación"
+    >
+      📍 Centrar ubicación
+    </button>
+  );
+}
 
 function haversine(lat1, lon1, lat2, lon2) {
   const toRad = (deg) => deg * Math.PI / 180;
@@ -131,7 +166,9 @@ const GeoDistanceCalculator = () => {
             <option value="terrain">Relieve</option>
           </select>
         </div>
-        <MapContainer center={mapCenter} zoom={15} style={{ height: '60vh', width: '90vw', borderRadius: '1rem', boxShadow: '0 4px 24px #0002' }}>
+        <div style={{ position: 'relative' }}>
+          <MapContainer center={mapCenter} zoom={15} style={{ height: '60vh', width: '90vw', borderRadius: '1rem', boxShadow: '0 4px 24px #0002', position: 'relative' }}>
+            <CenterLocationButton setMapCenter={setMapCenter} />
           {mapLayer === 'standard' && (
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -150,14 +187,15 @@ const GeoDistanceCalculator = () => {
               attribution="Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap (CC-BY-SA)"
             />
           )}
-          <MapClickHandler onMapClick={handleMapClick} />
-          {points.map((pos, idx) => (
-            <Marker key={idx} position={[pos.lat, pos.lng]} />
-          ))}
-          {points.length === 2 && (
-            <Polyline positions={points.map(p => [p.lat, p.lng])} color="red" />
-          )}
-        </MapContainer>
+            <MapClickHandler onMapClick={handleMapClick} />
+            {points.map((pos, idx) => (
+              <Marker key={idx} position={[pos.lat, pos.lng]} />
+            ))}
+            {points.length === 2 && (
+              <Polyline positions={points.map(p => [p.lat, p.lng])} color="red" />
+            )}
+          </MapContainer>
+        </div>
         <div className="mt-2 text-xs text-gray-600">
           <p>Haz click en el mapa para marcar los dos puntos. También puedes editar las coordenadas manualmente.</p>
         </div>

@@ -14,7 +14,8 @@ function haversine(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-const defaultPosition = [19.4326, -99.1332]; // CDMX por defecto
+// Retalhuleu, Guatemala (aprox km 170 CA-2): 14.5361, -91.6770
+const defaultPosition = [14.5361, -91.6770]; // Retalhuleu por defecto
 
 function MapClickHandler({ onMapClick }) {
   useMapEvents({

@@ -35,6 +35,7 @@ const GeoDistanceCalculator = () => {
   const [distance, setDistance] = useState(null);
   const [points, setPoints] = useState([]); // For map markers
   const [mapCenter, setMapCenter] = useState(defaultPosition);
+  const [mapLayer, setMapLayer] = useState('standard');
 
   // On mount, try to get user's geolocation
   React.useEffect(() => {
@@ -91,7 +92,7 @@ const GeoDistanceCalculator = () => {
   }, [lat1, lon1, lat2, lon2]);
 
   return (
-    <div className="max-w-xl mx-auto">
+    <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-0" style={{ minHeight: '100vh', minWidth: '100vw' }}>
       <h2 className="text-xl font-bold mb-4">Calculadora de Distancia Geográfica</h2>
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
@@ -117,14 +118,38 @@ const GeoDistanceCalculator = () => {
       {distance !== null && (
         <div className="mt-4 text-lg text-center">
           <span className="font-bold">{distance.toFixed(3)} km</span>
+          <br />
+          <span className="text-blue-700">Necesita un aproximado de <b>{(distance * 1000).toFixed(0)} metros</b> de cable.</span>
         </div>
       )}
       <div className="mt-6">
-        <MapContainer center={mapCenter} zoom={5} style={{ height: '350px', borderRadius: '1rem', boxShadow: '0 4px 24px #0002' }}>
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
-          />
+        <div className="mb-2 flex gap-2 items-center">
+          <label className="text-xs font-medium">Vista del mapa:</label>
+          <select value={mapLayer} onChange={e => setMapLayer(e.target.value)} className="border rounded px-2 py-1 text-xs">
+            <option value="standard">Estándar</option>
+            <option value="satellite">Satélite</option>
+            <option value="terrain">Relieve</option>
+          </select>
+        </div>
+        <MapContainer center={mapCenter} zoom={15} style={{ height: '60vh', width: '90vw', borderRadius: '1rem', boxShadow: '0 4px 24px #0002' }}>
+          {mapLayer === 'standard' && (
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; OpenStreetMap contributors"
+            />
+          )}
+          {mapLayer === 'satellite' && (
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+            />
+          )}
+          {mapLayer === 'terrain' && (
+            <TileLayer
+              url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+              attribution="Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap (CC-BY-SA)"
+            />
+          )}
           <MapClickHandler onMapClick={handleMapClick} />
           {points.map((pos, idx) => (
             <Marker key={idx} position={[pos.lat, pos.lng]} />
@@ -135,6 +160,9 @@ const GeoDistanceCalculator = () => {
         </MapContainer>
         <div className="mt-2 text-xs text-gray-600">
           <p>Haz click en el mapa para marcar los dos puntos. También puedes editar las coordenadas manualmente.</p>
+        </div>
+        <div className="mt-4 text-sm text-blue-900 bg-blue-100 rounded p-3">
+          <b>¿Para qué sirve?</b> Esta herramienta te ayuda a estimar la distancia exacta entre dos ubicaciones para calcular la cantidad de cable (fibra óptica, UTP, etc.) necesaria para cablear entre esos puntos.
         </div>
       </div>
     </div>

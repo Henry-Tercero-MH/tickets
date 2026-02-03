@@ -10,6 +10,7 @@ export default function QuoteFormatter() {
       setOutput('');
       return;
     }
+    
 
     // Separar por líneas nuevas, comas, o espacios múltiples
     const codes = input
@@ -37,7 +38,7 @@ export default function QuoteFormatter() {
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Formateador de Códigos</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Formateador de Códigos k</h2>
         <p className="text-gray-600">Agrega comillas simples y separa por comas</p>
       </div>
 

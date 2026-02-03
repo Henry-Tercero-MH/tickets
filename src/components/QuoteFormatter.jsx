@@ -18,8 +18,8 @@ export default function QuoteFormatter() {
       .map(code => code.trim())
       .filter(code => code.length > 0);
 
-    // Agregar comillas simples a cada código y unir con comas
-    const formatted = codes.map(code => `'${code}'`).join(',');
+    // Agregar comillas simples a cada código y unir con comas en columnas
+    const formatted = codes.map(code => `'${code}'`).join(',\n');
     setOutput(formatted);
   };
 
@@ -36,57 +36,57 @@ export default function QuoteFormatter() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Formateador de Códigos k</h2>
-        <p className="text-gray-600">Agrega comillas simples y separa por comas</p>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="text-center mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Formateador de Códigos</h2>
+        <p className="text-sm sm:text-base text-gray-600">Agrega comillas simples y separa por comas</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             Códigos de entrada (uno por línea o separados por coma)
           </label>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="01-054-0041&#10;01-054-0042&#10;01-054-0043"
-            className="w-full h-32 p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 font-mono text-sm"
+            className="w-full h-32 sm:h-40 p-2 sm:p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 font-mono text-xs sm:text-sm"
           />
           <p className="text-xs text-gray-500 mt-1">
             Ejemplo: 01-054-0041, 01-054-0042, 01-054-0043
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button
             onClick={formatWithQuotes}
-            className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 px-6 rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-md hover:shadow-lg"
+            className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-md hover:shadow-lg"
           >
             Formatear con Comillas
           </button>
           <button
             onClick={clearAll}
-            className="bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-all"
+            className="bg-gray-200 text-gray-700 py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-300 transition-all"
           >
             Limpiar
           </button>
         </div>
 
         {output && (
-          <div className="mt-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <div className="mt-4 sm:mt-6">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
               Resultado formateado
             </label>
             <div className="relative">
               <textarea
                 value={output}
                 readOnly
-                className="w-full h-32 p-3 border-2 border-green-300 bg-green-50 rounded-lg font-mono text-sm"
+                className="w-full h-32 sm:h-40 p-2 sm:p-3 border-2 border-green-300 bg-green-50 rounded-lg font-mono text-xs sm:text-sm"
               />
               <button
                 onClick={copyToClipboard}
-                className="absolute top-2 right-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition-all shadow-md"
+                className="absolute top-2 right-2 bg-green-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold hover:bg-green-700 transition-all shadow-md"
               >
                 {copied ? '✓ Copiado' : 'Copiar'}
               </button>
@@ -98,13 +98,13 @@ export default function QuoteFormatter() {
         )}
       </div>
 
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-        <h3 className="font-semibold text-blue-800 mb-2">Ejemplos de uso:</h3>
-        <ul className="text-sm text-blue-700 space-y-1">
-          <li>• Entrada: <code className="bg-white px-2 py-1 rounded">01-054-0041</code></li>
-          <li>• Salida: <code className="bg-white px-2 py-1 rounded">'01-054-0041'</code></li>
-          <li className="mt-2">• Entrada múltiple: <code className="bg-white px-2 py-1 rounded">01-054-0041, 01-054-0042</code></li>
-          <li>• Salida: <code className="bg-white px-2 py-1 rounded">'01-054-0041','01-054-0042'</code></li>
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-3 sm:p-4 rounded">
+        <h3 className="font-semibold text-blue-800 mb-2 text-sm sm:text-base">Ejemplos de uso:</h3>
+        <ul className="text-xs sm:text-sm text-blue-700 space-y-1">
+          <li className="break-words">• Entrada: <code className="bg-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">01-054-0041</code></li>
+          <li className="break-words">• Salida: <code className="bg-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">'01-054-0041'</code></li>
+          <li className="mt-2 break-words">• Entrada múltiple: <code className="bg-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">01-054-0041, 01-054-0042</code></li>
+          <li className="break-words">• Salida en columnas: <code className="bg-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">'01-054-0041',<br/>'01-054-0042'</code></li>
         </ul>
       </div>
     </div>

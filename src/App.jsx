@@ -12,10 +12,10 @@ import GeoDistanceCalculator from './components/GeoDistanceCalculator';
 function Modal({ open, onClose, children }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full relative animate-modal-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full relative animate-modal-in max-h-[90vh] overflow-y-auto">
         <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl z-10" onClick={onClose}>&times;</button>
-        <div className="p-6">{children}</div>
+        <div className="p-4 sm:p-6">{children}</div>
       </div>
     </div>
   );

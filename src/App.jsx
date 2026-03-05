@@ -8,15 +8,20 @@ import QuoteFormatter from './components/QuoteFormatter';
 import NetworkMapDesigner from './components/NetworkMapDesigner';
 import ManualTextLabelModal from './components/ManualTextLabelModal';
 import GeoDistanceCalculator from './components/GeoDistanceCalculator';
+import GeofenceCreator from './components/GeofenceCreator';
 import ITGuides from './components/ITGuides';
 
-function Modal({ open, onClose, children }) {
+function Modal({ open, onClose, children, wide, fullscreen }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full relative animate-modal-in max-h-[90vh] overflow-y-auto">
-        <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl z-10" onClick={onClose}>&times;</button>
-        <div className="p-4 sm:p-6">{children}</div>
+      <div className={`bg-white shadow-2xl relative animate-modal-in overflow-y-auto ${
+        fullscreen
+          ? 'w-full h-full rounded-none max-h-full'
+          : `rounded-2xl ${wide ? 'max-w-5xl' : 'max-w-2xl'} w-full max-h-[90vh]`
+      }`}>
+        <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl z-[1001]" onClick={onClose}>&times;</button>
+        <div className={fullscreen ? 'p-3 h-full flex flex-col' : 'p-4 sm:p-6'}>{children}</div>
       </div>
     </div>
   );
@@ -166,6 +171,22 @@ function App() {
             </div>
           </div>
 
+          {/* Creador de Geocercas */}
+          <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-200 hover:border-teal-400 group" onClick={() => setModal('geofence')}>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-lg p-3 group-hover:scale-110 transition-transform">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                </div>
+                <span className="text-xs font-semibold text-teal-600 bg-teal-50 px-2 py-1 rounded-full">GEO</span>
+              </div>
+              <h2 className="text-lg font-bold text-slate-800 mb-2">Creador de Geocercas</h2>
+              <p className="text-slate-600 text-sm leading-relaxed">Dibuja polígonos en el mapa y guarda las coordenadas de cada punto.</p>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -190,6 +211,9 @@ function App() {
       </Modal>
       <Modal open={modal === 'itguides'} onClose={() => setModal(null)}>
         <ITGuides />
+      </Modal>
+      <Modal open={modal === 'geofence'} onClose={() => setModal(null)} fullscreen>
+        <GeofenceCreator />
       </Modal>
     </div>
   );

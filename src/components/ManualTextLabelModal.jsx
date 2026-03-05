@@ -1,5 +1,24 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import sparklingFontUrl from '../assets/fonts/SparklingValentine.ttf';
+
+// Fuentes disponibles
+const FONT_OPTIONS = [
+  { label: 'Arial', value: 'Arial, sans-serif' },
+  { label: 'Edwardian Script', value: "'Great Vibes', 'Edwardian Script ITC', cursive" },
+  { label: 'Times New Roman', value: "'Times New Roman', serif" },
+  { label: 'Georgia', value: 'Georgia, serif' },
+  { label: 'Courier New', value: "'Courier New', monospace" },
+  { label: 'Impact', value: 'Impact, sans-serif' },
+  { label: 'Comic Sans', value: "'Comic Sans MS', cursive" },
+  { label: 'Roboto', value: "'Roboto', sans-serif" },
+  { label: 'Dancing Script', value: "'Dancing Script', cursive" },
+  { label: 'Playfair Display', value: "'Playfair Display', serif" },
+  { label: 'Sparkling Valentine', value: "'Sparkling Valentine', cursive" },
+];
+
+// Google Fonts que necesitan carga externa
+const GOOGLE_FONTS = ['Great Vibes', 'Roboto', 'Dancing Script', 'Playfair Display'];
 
 // Calcula el tamaño de fuente dinámico según la longitud y el máximo permitido
 function getFontSizeForLabel(text) {
@@ -16,6 +35,20 @@ const ManualTextLabelModal = ({ open, onClose }) => {
   const [inputValue, setInputValue] = useState('');
   const [manualLabels, setManualLabels] = useState([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0].value);
+
+  // Cargar Google Fonts
+  useEffect(() => {
+    const families = GOOGLE_FONTS.map(f => f.replace(/ /g, '+')).join('&family=');
+    const linkId = 'google-fonts-labels';
+    if (!document.getElementById(linkId)) {
+      const link = document.createElement('link');
+      link.id = linkId;
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`;
+      document.head.appendChild(link);
+    }
+  }, []);
 
   if (!open) return null;
 
@@ -37,10 +70,20 @@ const ManualTextLabelModal = ({ open, onClose }) => {
   };
 
   const handlePrint = () => {
+    const googleFontsLink = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${GOOGLE_FONTS.map(f => f.replace(/ /g, '+')).join('&family=')}&display=swap">`;
+    // Inyectar @font-face para Sparkling Valentine en el iframe de impresión
+    const sparklingFontFace = `
+      @font-face {
+        font-family: 'Sparkling Valentine';
+        src: url('${sparklingFontUrl}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+    `;
     const labelHTML = manualLabels.map((label) => {
       const fontSize = getFontSizeForLabel(label);
       return `
-      <div class="label" style="width: 5cm; height: 2.5cm; font-family: Arial, sans-serif; box-sizing: border-box; padding: 0.1cm; margin: 0; page-break-inside: avoid; display: block;">
+      <div class="label" style="width: 5cm; height: 2.5cm; font-family: ${selectedFont}; box-sizing: border-box; padding: 0.1cm; margin: 0; page-break-inside: avoid; display: block;">
         <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; font-weight: bold; font-size: ${fontSize}; line-height: 1.1; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
           ${label}
         </div>
@@ -53,7 +96,9 @@ const ManualTextLabelModal = ({ open, onClose }) => {
       <html>
         <head>
           <title>Etiquetas Manuales - Impresión</title>
+          ${googleFontsLink}
           <style>
+            ${sparklingFontFace}
             @media print {
               @page {
                 size: 5cm 2.5cm;
@@ -71,7 +116,7 @@ const ManualTextLabelModal = ({ open, onClose }) => {
             body {
               margin: 0;
               padding: 0;
-              font-family: Arial, sans-serif;
+              font-family: ${selectedFont};
             }
             .labels-container {
               display: block;
@@ -128,6 +173,29 @@ const ManualTextLabelModal = ({ open, onClose }) => {
         </div>
 
         <div className="p-6">
+          {/* Selector de fuente */}
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Fuente
+            </label>
+            <div className="flex gap-2 flex-wrap">
+              {FONT_OPTIONS.map((font) => (
+                <button
+                  key={font.value}
+                  onClick={() => setSelectedFont(font.value)}
+                  className={`px-3 py-1.5 rounded-lg text-sm border transition-all duration-200 ${
+                    selectedFont === font.value
+                      ? 'bg-green-600 text-white border-green-600 shadow-md'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-green-400 hover:bg-green-50'
+                  }`}
+                  style={{ fontFamily: font.value }}
+                >
+                  {font.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Nombre o código del equipo
@@ -178,7 +246,7 @@ const ManualTextLabelModal = ({ open, onClose }) => {
                       const fontSize = getFontSizeForLabel(label);
                       return (
                       <div key={index} className="relative">
-                        <div className="bg-white flex items-center justify-center" style={{width: '100%', aspectRatio: '2/1', fontFamily: 'Arial, sans-serif', border: '2px solid #000', boxSizing: 'border-box', padding: '0.3cm'}}>
+                        <div className="bg-white flex items-center justify-center" style={{width: '100%', aspectRatio: '2/1', fontFamily: selectedFont, border: '2px solid #000', boxSizing: 'border-box', padding: '0.3cm'}}>
                           <div className="text-center font-bold" style={{fontSize: `calc(${fontSize} * 0.4)`, lineHeight: '1.3', wordWrap: 'break-word', overflowWrap: 'break-word'}}>
                             {label}
                           </div>

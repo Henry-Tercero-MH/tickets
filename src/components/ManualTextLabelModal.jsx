@@ -1,7 +1,46 @@
 
 import React, { useState, useEffect } from 'react';
 import sparklingFontUrl from '../assets/fonts/SparklingValentine.ttf';
-import logoUrl from '../imagenes/logo.png';
+
+// Iconos de caña de azúcar en SVG (blanco y negro para impresión)
+const CANE_ICONS = [
+  {
+    id: 'none',
+    label: 'Sin icono',
+    svg: null,
+  },
+  {
+    id: 'cane1',
+    label: 'Caña Simple',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M32 58V12"/><path d="M32 12c0-4 3-7 7-7"/><path d="M32 20c-5 0-10-3-12-6"/><path d="M32 28c5 0 10-3 12-6"/><path d="M32 36c-5 0-10-3-12-6"/><path d="M32 44c5 0 10-3 12-6"/><line x1="30" y1="18" x2="34" y2="18" stroke="#000" stroke-width="3"/><line x1="30" y1="26" x2="34" y2="26" stroke="#000" stroke-width="3"/><line x1="30" y1="34" x2="34" y2="34" stroke="#000" stroke-width="3"/><line x1="30" y1="42" x2="34" y2="42" stroke="#000" stroke-width="3"/><line x1="30" y1="50" x2="34" y2="50" stroke="#000" stroke-width="3"/></svg>`,
+  },
+  {
+    id: 'cane2',
+    label: 'Caña Doble',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="22" y="10" width="6" height="48" rx="3" fill="#fff" stroke="#000" stroke-width="1.5"/><rect x="36" y="14" width="6" height="44" rx="3" fill="#fff" stroke="#000" stroke-width="1.5"/><line x1="22" y1="20" x2="28" y2="20" stroke="#000" stroke-width="2"/><line x1="22" y1="30" x2="28" y2="30" stroke="#000" stroke-width="2"/><line x1="22" y1="40" x2="28" y2="40" stroke="#000" stroke-width="2"/><line x1="22" y1="50" x2="28" y2="50" stroke="#000" stroke-width="2"/><line x1="36" y1="24" x2="42" y2="24" stroke="#000" stroke-width="2"/><line x1="36" y1="34" x2="42" y2="34" stroke="#000" stroke-width="2"/><line x1="36" y1="44" x2="42" y2="44" stroke="#000" stroke-width="2"/><path d="M25 10c-3-5-8-5-10-3" stroke="#000" stroke-width="1.5" fill="none"/><path d="M25 10c2-5 7-6 10-4" stroke="#000" stroke-width="1.5" fill="none"/><path d="M39 14c-2-5-6-6-8-4" stroke="#000" stroke-width="1.5" fill="none"/><path d="M39 14c3-4 7-4 9-2" stroke="#000" stroke-width="1.5" fill="none"/></svg>`,
+  },
+  {
+    id: 'cane3',
+    label: 'Caña con Hojas',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M32 58V8" stroke="#000" stroke-width="4"/><line x1="30" y1="16" x2="34" y2="16" stroke="#000" stroke-width="3"/><line x1="30" y1="26" x2="34" y2="26" stroke="#000" stroke-width="3"/><line x1="30" y1="36" x2="34" y2="36" stroke="#000" stroke-width="3"/><line x1="30" y1="46" x2="34" y2="46" stroke="#000" stroke-width="3"/><path d="M32 8c-8-2-14 2-16 6" stroke="#000" stroke-width="2" fill="none"/><path d="M32 8c8-2 14 2 16 6" stroke="#000" stroke-width="2" fill="none"/><path d="M32 18c-7 0-13 4-15 7" stroke="#000" stroke-width="1.5" fill="none"/><path d="M32 28c7 0 13 4 15 7" stroke="#000" stroke-width="1.5" fill="none"/><path d="M32 38c-7 0-13 4-15 7" stroke="#000" stroke-width="1.5" fill="none"/><path d="M32 48c7 0 12 3 14 6" stroke="#000" stroke-width="1.5" fill="none"/></svg>`,
+  },
+  {
+    id: 'cane4',
+    label: 'Manojo de Caña',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 58V16" stroke="#000" stroke-width="3.5"/><path d="M32 58V10" stroke="#000" stroke-width="4"/><path d="M44 58V18" stroke="#000" stroke-width="3.5"/><line x1="18.5" y1="24" x2="21.5" y2="24" stroke="#000" stroke-width="2"/><line x1="18.5" y1="34" x2="21.5" y2="34" stroke="#000" stroke-width="2"/><line x1="18.5" y1="44" x2="21.5" y2="44" stroke="#000" stroke-width="2"/><line x1="30.5" y1="18" x2="33.5" y2="18" stroke="#000" stroke-width="2"/><line x1="30.5" y1="28" x2="33.5" y2="28" stroke="#000" stroke-width="2"/><line x1="30.5" y1="38" x2="33.5" y2="38" stroke="#000" stroke-width="2"/><line x1="30.5" y1="48" x2="33.5" y2="48" stroke="#000" stroke-width="2"/><line x1="42.5" y1="26" x2="45.5" y2="26" stroke="#000" stroke-width="2"/><line x1="42.5" y1="36" x2="45.5" y2="36" stroke="#000" stroke-width="2"/><line x1="42.5" y1="46" x2="45.5" y2="46" stroke="#000" stroke-width="2"/><path d="M20 16c-6-3-10 0-12 3" stroke="#000" stroke-width="1.5"/><path d="M32 10c-5-4-10-2-12 1" stroke="#000" stroke-width="1.5"/><path d="M32 10c5-4 10-2 12 1" stroke="#000" stroke-width="1.5"/><path d="M44 18c6-3 10 0 12 3" stroke="#000" stroke-width="1.5"/></svg>`,
+  },
+  {
+    id: 'cane5',
+    label: 'Caña Circular',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="28" fill="#fff" stroke="#000" stroke-width="2"/><path d="M32 52V16" stroke="#000" stroke-width="3.5"/><line x1="30.5" y1="22" x2="33.5" y2="22" stroke="#000" stroke-width="2.5"/><line x1="30.5" y1="30" x2="33.5" y2="30" stroke="#000" stroke-width="2.5"/><line x1="30.5" y1="38" x2="33.5" y2="38" stroke="#000" stroke-width="2.5"/><line x1="30.5" y1="46" x2="33.5" y2="46" stroke="#000" stroke-width="2.5"/><path d="M32 16c-6-2-11 1-13 4" stroke="#000" stroke-width="1.5"/><path d="M32 16c6-2 11 1 13 4" stroke="#000" stroke-width="1.5"/><path d="M32 24c-5 0-9 3-11 5" stroke="#000" stroke-width="1.2"/><path d="M32 32c5 0 9 3 11 5" stroke="#000" stroke-width="1.2"/><path d="M32 40c-5 0-9 3-11 5" stroke="#000" stroke-width="1.2"/></svg>`,
+  },
+];
+
+// Función para obtener el SVG como data URI para impresión
+function svgToDataUri(svgString) {
+  if (!svgString) return '';
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+}
 
 // Fuentes disponibles
 const FONT_OPTIONS = [
@@ -37,20 +76,7 @@ const ManualTextLabelModal = ({ open, onClose }) => {
   const [manualLabels, setManualLabels] = useState([]);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0].value);
-  const [showLogo, setShowLogo] = useState(false);
-  const [logoBase64, setLogoBase64] = useState('');
-
-  // Convertir logo a base64 para usarlo en el iframe de impresión
-  useEffect(() => {
-    fetch(logoUrl)
-      .then(res => res.blob())
-      .then(blob => {
-        const reader = new FileReader();
-        reader.onloadend = () => setLogoBase64(reader.result);
-        reader.readAsDataURL(blob);
-      })
-      .catch(() => {});
-  }, []);
+  const [selectedIcon, setSelectedIcon] = useState('none');
 
   // Cargar Google Fonts
   useEffect(() => {
@@ -95,15 +121,17 @@ const ManualTextLabelModal = ({ open, onClose }) => {
         font-style: normal;
       }
     `;
+    const iconObj = CANE_ICONS.find(i => i.id === selectedIcon);
+    const iconDataUri = iconObj?.svg ? svgToDataUri(iconObj.svg) : '';
     const labelHTML = manualLabels.map((label) => {
       const fontSize = getFontSizeForLabel(label);
-      const logoHtml = showLogo && logoBase64
-        ? `<img src="${logoBase64}" style="width: 0.7cm; height: 0.7cm; object-fit: contain; flex-shrink: 0;" />`
+      const iconHtml = iconDataUri
+        ? `<img src="${iconDataUri}" style="width: 0.8cm; height: 0.8cm; object-fit: contain; flex-shrink: 0;" />`
         : '';
       return `
       <div class="label" style="width: 5cm; height: 2.5cm; font-family: ${selectedFont}; box-sizing: border-box; padding: 0.1cm; margin: 0; page-break-inside: avoid; display: block;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 0.15cm; width: 100%; height: 100%; text-align: center; font-weight: bold; font-size: ${fontSize}; line-height: 1.1; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
-          ${logoHtml}
+          ${iconHtml}
           <span>${label}</span>
         </div>
       </div>
@@ -192,26 +220,34 @@ const ManualTextLabelModal = ({ open, onClose }) => {
         </div>
 
         <div className="p-6">
-          {/* Toggle de logo */}
-          <div className="mb-4 flex items-center gap-3">
-            <label className="block text-sm font-semibold text-gray-700">
-              Incluir logo
+          {/* Selector de icono de caña */}
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Icono de etiqueta
             </label>
-            <button
-              onClick={() => setShowLogo(!showLogo)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
-                showLogo ? 'bg-green-600' : 'bg-gray-300'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
-                  showLogo ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            {showLogo && (
-              <img src={logoUrl} alt="Logo" className="h-8 w-8 object-contain rounded border border-gray-200" />
-            )}
+            <div className="flex gap-2 flex-wrap">
+              {CANE_ICONS.map((icon) => (
+                <button
+                  key={icon.id}
+                  onClick={() => setSelectedIcon(icon.id)}
+                  className={`flex flex-col items-center justify-center w-16 h-16 rounded-lg border-2 transition-all duration-200 ${
+                    selectedIcon === icon.id
+                      ? 'border-green-600 bg-green-50 shadow-md ring-2 ring-green-200'
+                      : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50'
+                  }`}
+                  title={icon.label}
+                >
+                  {icon.svg ? (
+                    <div className="w-9 h-9" dangerouslySetInnerHTML={{ __html: icon.svg }} />
+                  ) : (
+                    <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                  )}
+                  <span className="text-[9px] text-gray-500 mt-0.5 leading-tight text-center">{icon.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Selector de fuente */}
@@ -289,8 +325,8 @@ const ManualTextLabelModal = ({ open, onClose }) => {
                       <div key={index} className="relative">
                         <div className="bg-white flex items-center justify-center" style={{width: '100%', aspectRatio: '2/1', fontFamily: selectedFont, border: '2px solid #000', boxSizing: 'border-box', padding: '0.3cm'}}>
                           <div className="flex items-center justify-center gap-1 w-full h-full">
-                            {showLogo && (
-                              <img src={logoUrl} alt="Logo" style={{width: '15%', height: '60%', objectFit: 'contain', flexShrink: 0}} />
+                            {selectedIcon !== 'none' && CANE_ICONS.find(i => i.id === selectedIcon)?.svg && (
+                              <div style={{width: '18%', height: '65%', flexShrink: 0}} dangerouslySetInnerHTML={{ __html: CANE_ICONS.find(i => i.id === selectedIcon).svg }} />
                             )}
                             <div className="text-center font-bold" style={{fontSize: `calc(${fontSize} * 0.4)`, lineHeight: '1.3', wordWrap: 'break-word', overflowWrap: 'break-word'}}>
                               {label}

@@ -47,6 +47,8 @@ const ManualTextLabelModal = ({ open, onClose }) => {
   const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0].value);
   const [logoPosition, setLogoPosition] = useState('none');
   const [logoBase64, setLogoBase64] = useState('');
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState('');
 
   // Convertir logo a base64 para el iframe de impresión
   useEffect(() => {
@@ -94,6 +96,18 @@ const ManualTextLabelModal = ({ open, onClose }) => {
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleAddLabel();
+    }
+  };
+
+  // Agregar múltiples etiquetas de golpe (una por línea)
+  const handleBulkAdd = () => {
+    const lines = bulkText
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
+    if (lines.length > 0) {
+      setManualLabels([...manualLabels, ...lines]);
+      setBulkText('');
     }
   };
 
@@ -343,28 +357,74 @@ const ManualTextLabelModal = ({ open, onClose }) => {
             ) : (
               /* Modo con texto */
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Nombre o código del equipo
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Ingrese nombre o código del equipo..."
-                    className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    {bulkMode ? 'Agregar múltiples etiquetas' : 'Nombre o código del equipo'}
+                  </label>
                   <button
-                    onClick={handleAddLabel}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all duration-200 flex items-center gap-2"
+                    onClick={() => setBulkMode(!bulkMode)}
+                    className="text-xs font-medium flex items-center gap-1 px-2 py-1 rounded-md border transition-colors"
+                    style={{
+                      color: bulkMode ? '#047857' : '#6B7280',
+                      borderColor: bulkMode ? '#059669' : '#D1D5DB',
+                      backgroundColor: bulkMode ? '#ECFDF5' : '#F9FAFB',
+                    }}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
-                    Agregar
+                    {bulkMode ? 'Individual' : 'Masivo'}
                   </button>
                 </div>
+
+                {bulkMode ? (
+                  /* Modo masivo: textarea */
+                  <div>
+                    <textarea
+                      value={bulkText}
+                      onChange={(e) => setBulkText(e.target.value)}
+                      placeholder={"Escriba una etiqueta por línea, por ejemplo:\nPC-CONTABILIDAD\nLAPTOP-RRHH\nSERVIDOR-01\nIMPRESORA-PISO2"}
+                      rows={5}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-y text-sm font-mono"
+                    />
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-gray-500">
+                        {bulkText.split('\n').filter(l => l.trim()).length} etiqueta(s) detectadas
+                      </span>
+                      <button
+                        onClick={handleBulkAdd}
+                        disabled={!bulkText.trim()}
+                        className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Agregar todas
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Modo individual */
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Ingrese nombre o código del equipo..."
+                      className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                    <button
+                      onClick={handleAddLabel}
+                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-all duration-200 flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Agregar
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

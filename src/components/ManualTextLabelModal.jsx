@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import sparklingFontUrl from '../assets/fonts/SparklingValentine.ttf';
+import logoUrl from '../imagenes/logo.png';
 
 // Fuentes disponibles
 const FONT_OPTIONS = [
@@ -36,6 +37,20 @@ const ManualTextLabelModal = ({ open, onClose }) => {
   const [manualLabels, setManualLabels] = useState([]);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0].value);
+  const [showLogo, setShowLogo] = useState(false);
+  const [logoBase64, setLogoBase64] = useState('');
+
+  // Convertir logo a base64 para usarlo en el iframe de impresión
+  useEffect(() => {
+    fetch(logoUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => setLogoBase64(reader.result);
+        reader.readAsDataURL(blob);
+      })
+      .catch(() => {});
+  }, []);
 
   // Cargar Google Fonts
   useEffect(() => {
@@ -82,10 +97,14 @@ const ManualTextLabelModal = ({ open, onClose }) => {
     `;
     const labelHTML = manualLabels.map((label) => {
       const fontSize = getFontSizeForLabel(label);
+      const logoHtml = showLogo && logoBase64
+        ? `<img src="${logoBase64}" style="width: 0.7cm; height: 0.7cm; object-fit: contain; flex-shrink: 0;" />`
+        : '';
       return `
       <div class="label" style="width: 5cm; height: 2.5cm; font-family: ${selectedFont}; box-sizing: border-box; padding: 0.1cm; margin: 0; page-break-inside: avoid; display: block;">
-        <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; font-weight: bold; font-size: ${fontSize}; line-height: 1.1; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
-          ${label}
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.15cm; width: 100%; height: 100%; text-align: center; font-weight: bold; font-size: ${fontSize}; line-height: 1.1; word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+          ${logoHtml}
+          <span>${label}</span>
         </div>
       </div>
     `;
@@ -173,6 +192,28 @@ const ManualTextLabelModal = ({ open, onClose }) => {
         </div>
 
         <div className="p-6">
+          {/* Toggle de logo */}
+          <div className="mb-4 flex items-center gap-3">
+            <label className="block text-sm font-semibold text-gray-700">
+              Incluir logo
+            </label>
+            <button
+              onClick={() => setShowLogo(!showLogo)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+                showLogo ? 'bg-green-600' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                  showLogo ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+            {showLogo && (
+              <img src={logoUrl} alt="Logo" className="h-8 w-8 object-contain rounded border border-gray-200" />
+            )}
+          </div>
+
           {/* Selector de fuente */}
           <div className="mb-4">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -247,8 +288,13 @@ const ManualTextLabelModal = ({ open, onClose }) => {
                       return (
                       <div key={index} className="relative">
                         <div className="bg-white flex items-center justify-center" style={{width: '100%', aspectRatio: '2/1', fontFamily: selectedFont, border: '2px solid #000', boxSizing: 'border-box', padding: '0.3cm'}}>
-                          <div className="text-center font-bold" style={{fontSize: `calc(${fontSize} * 0.4)`, lineHeight: '1.3', wordWrap: 'break-word', overflowWrap: 'break-word'}}>
-                            {label}
+                          <div className="flex items-center justify-center gap-1 w-full h-full">
+                            {showLogo && (
+                              <img src={logoUrl} alt="Logo" style={{width: '15%', height: '60%', objectFit: 'contain', flexShrink: 0}} />
+                            )}
+                            <div className="text-center font-bold" style={{fontSize: `calc(${fontSize} * 0.4)`, lineHeight: '1.3', wordWrap: 'break-word', overflowWrap: 'break-word'}}>
+                              {label}
+                            </div>
                           </div>
                         </div>
                         <button
